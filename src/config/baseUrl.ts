@@ -1,6 +1,6 @@
 
 
-const baseURL = "https://todos-testovoe-server-1.onrender.com/todos"
+const baseURL = import.meta.env.VITE_API_URL
 
 
 export default baseURL
