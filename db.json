@@ -1,4 +1,19 @@
 {
   "todos": [
+    {
+      "id": "5f71",
+      "text": "first task",
+      "completed": false
+    },
+    {
+      "id": "31e7",
+      "text": "second task",
+      "completed": false
+    },
+    {
+      "id": "b32c",
+      "text": "thrid task",
+      "completed": false
+    }
   ]
 }
