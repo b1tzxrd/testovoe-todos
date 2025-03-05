@@ -1,52 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Task, TaskFilter } from "../../types/tasks";
-import { addTask, fetchTodos, toggleTask, deleteTask, deleteCompletedTasks } from "../../api/tasksApi";
 
 const App = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState<string>("");
   const [filter, setFilter] = useState<TaskFilter>("all");
 
-
-  useEffect(() => {
-    fetchTodos().then(setTasks);
-  }, [])
-
-  const handleAddTask: React.FormEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
-    addTask(newTask).then(task => {
-      setTasks([...tasks, task]);
-      setNewTask("");
-    })
-  }
-
-  const handleToggleTask = async (id: string, completed: boolean) => {
-    toggleTask(id, !completed)
-      .then(data => {
-        setTasks(tasks.map(task => task.id === id ? data : task)) 
-      })
-    }
-
-
-  const handleDeleteTask = async (id: string) => {
-    deleteTask(id).then(() => {
-      setTasks(tasks.filter(task => task.id !== id));
-    })
-    .catch(error => console.error(error));
-  }
-
-  const handleClearCompleted = async () => {
-    deleteCompletedTasks(tasks.filter(task => task.completed))
-      .then(() => {
-        setTasks(tasks.filter(task => !task.completed));
-      })
-  }
-
-  const filteredTasks = tasks.filter(task => {
-    if (filter === "active") return !task.completed;
-    if (filter === "completed") return task.completed;
-    return true;
-  })
 
 
   return (

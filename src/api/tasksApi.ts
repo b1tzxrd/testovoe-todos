@@ -1,59 +1,49 @@
-import baseURL from "../config/baseUrl";
+import { Task } from "../types/tasks";
 
-export const fetchTodos = async () => {
-    try {
-        const response = await fetch(baseURL);
-        if (!response.ok) throw new Error("Ошибка загрузки данных");
-        return response.json();
-    } catch (error) {
-        console.error(error);
-        return [];
-    }
+const STORAGE_KEY = 'todos';
+
+const loadTodos = (): Task[] => {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
 };
 
-export const addTask = async (text: string) => {
-    try {
-        const response = await fetch(baseURL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text, completed: false }),
-        });
-        if (!response.ok) throw new Error("Ошибка при добавлении задачи");
-        return response.json();
-    } catch (error) {
-        console.error(error);
-    }
+const saveTodos = (todos: Task[]) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
 };
 
-export const toggleTask = async (id: string, completed: boolean) => {
-    try {
-        const response = await fetch(`${baseURL}/${id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ completed }),
-        });
-        if (!response.ok) throw new Error("Ошибка обновления задачи");
-        return response.json();
-    } catch (error) {
-        console.error(error);
-    }
+export const fetchTodos = async (): Promise<Task[]> => {
+    return loadTodos();
 };
 
-export const deleteTask = async (id: string) => {
-    try {
-        const response = await fetch(`${baseURL}/${id}`, { method: "DELETE" });
-        if (!response.ok) throw new Error("Ошибка при удалении задачи");
-    } catch (error) {
-        console.error("Ошибка при удалении задачи", error);
-    }
-}
+export const addTask = async (text: string): Promise<Task> => {
+    const todos = loadTodos();
+    const newTask: Task = {
+        id: Date.now().toString(),
+        text,
+        completed: false,
+    };
+    const updatedTodos = [...todos, newTask];
+    saveTodos(updatedTodos);
+    return newTask;
+};
 
-export const deleteCompletedTasks = async (completedTasks: { id: string }[]) => {
-    try {
-        await Promise.all(completedTasks.map(task =>
-            fetch(`${baseURL}/${task.id}`, { method: "DELETE" })
-        ));
-    } catch (error) {
-        console.error("Ошибка при удалении завершённых задач", error);
-    }
+export const toggleTask = async (id: string, completed: boolean): Promise<Task> => {
+    const todos = loadTodos();
+    const updatedTodos = todos.map(task => 
+        task.id === id ? { ...task, completed } : task
+    );
+    saveTodos(updatedTodos);
+    return updatedTodos.find(task => task.id === id)!;  // гарантируем, что найдём
+};
+
+export const deleteTask = async (id: string): Promise<void> => {
+    const todos = loadTodos();
+    const updatedTodos = todos.filter(task => task.id !== id);
+    saveTodos(updatedTodos);
+};
+
+export const deleteCompletedTasks = async (): Promise<void> => {
+    const todos = loadTodos();
+    const updatedTodos = todos.filter(task => !task.completed);
+    saveTodos(updatedTodos);
 };
